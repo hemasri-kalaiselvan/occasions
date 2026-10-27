@@ -1,27 +1,26 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Family Dates</title>
+<title>Occasions</title>
 <style>
-:root{--bg:#faf8f5;--fg:#222;--card:#fff;--mut:#777;--ac:#b4472b;--bd:#e5dfd6}
-@media(prefers-color-scheme:dark){:root{--bg:#1b1a19;--fg:#eee;--card:#262524;--mut:#999;--ac:#e8855f;--bd:#3a3836}}
-*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--fg);padding:12px;max-width:720px;margin:auto}
-h1{font-size:20px;margin:4px 0}header{display:flex;justify-content:space-between;align-items:center}
+:root{color-scheme:light;--bg:#fff8f0;--fg:#2a2140;--card:#fff;--mut:#7a6f94;--ac:#ff4f79;--bd:#f6d9e4}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:linear-gradient(160deg,#fff1d6,#ffdce9 50%,#dfe8ff) fixed;min-height:100vh;color:var(--fg);padding:12px;max-width:720px;margin:auto}
+h1{font-size:24px;margin:4px 0;color:var(--ac)}header{display:flex;justify-content:space-between;align-items:center}
 button,input,select{font:inherit;color:inherit}
 button{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;cursor:pointer}
-button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.p{background:linear-gradient(135deg,#ff4f79,#ff9f1c);color:#fff;border-color:transparent;font-weight:700}
 #chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
-.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-h3{margin:16px 0 4px;color:var(--mut);font-size:13px;text-transform:uppercase}
-.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:4px 0;display:flex;gap:10px;align-items:center}
-.row{padding:5px 8px;gap:6px}.d{min-width:52px;font-weight:600;font-size:14px}.n{flex:1;min-width:0}.n small{display:none}.lb{font-size:11px;color:var(--mut);white-space:nowrap}.row button{padding:2px 7px}
+.chip.on{color:#fff!important}
+h3{margin:16px 0 4px;color:var(--ac);font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.row{background:var(--card);border:1px solid var(--bd);box-shadow:0 2px 6px #ff4f7922;border-radius:12px;padding:8px 10px;margin:4px 0;display:flex;gap:10px;align-items:center}
+.row{padding:5px 8px;gap:6px}.d{flex:none;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}.n small{display:none}.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}.chip{border-width:2px;border-radius:20px;font-weight:600}.row button{padding:2px 7px}
 dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--fg);width:min(92vw,380px)}
 label{display:block;margin:8px 0 2px;font-size:13px;color:var(--mut)}
 input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
 .bar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 #st{font-size:12px;color:var(--mut);margin:4px 0}
 </style></head><body>
-<header><h1>🎂 Family Dates</h1><span><button id="set">⚙</button> <button class="p" id="add">+ Add</button></span></header>
+<header><h1>🎉 Occasions</h1><span><button id="set">⚙</button> <button class="p" id="add">+ Add</button></span></header>
 <div id="st"></div><div id="chips"></div><div id="list"></div>
 
 <dialog id="f"><form method="dialog" id="ff" onsubmit="return false">
@@ -44,6 +43,7 @@ input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--
 
 <script>
 const LABELS=["vetri_family_bday","vetri_friends_bday","vetri_family_wed","raj_family_bday","raj_family_wed"];
+const LC={all:"#ff4f79",vetri_family_bday:"#ff4f79",vetri_friends_bday:"#ff9f1c",vetri_family_wed:"#8f5cff",raj_family_bday:"#00a884",raj_family_wed:"#0984e3"};
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const $=i=>document.getElementById(i);
 let items=[],sha=null,filt="all",editId=null;
@@ -81,12 +81,12 @@ async function save(){
 function render(){
   $("chips").innerHTML=["all",...LABELS].map(l=>{
     const n=l=="all"?items.length:items.filter(i=>i.label==l).length;
-    return `<button class="chip ${filt==l?"on":""}" data-l="${l}">${l=="all"?"All":l} (${n})</button>`}).join("");
+    return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":l} (${n})</button>`}).join("");
   const v=items.filter(i=>filt=="all"||i.label==filt).sort((a,b)=>(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
   let h="",cm=0;
   for(const i of v){
     if((i.m||99)!=cm){cm=i.m||99;h+=`<h3>${i.m?MON[cm-1]:"No date yet"}</h3>`}
-    h+=`<div class="row"><div class="d">${i.m?MON[i.m-1]+" "+i.d:"—"}</div><div class="n">${i.type=="wed"?"💍":"🎂"} ${esc(i.name)}${i.y?" <small style='display:inline'>("+i.y+")</small>":""}</div><div class="lb">${i.label||"untagged"}</div>
+    h+=`<div class="row" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${i.label||"untagged"}</div>
     <button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h||"<p style='color:var(--mut)'>No entries.</p>";
