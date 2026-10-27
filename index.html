@@ -13,7 +13,7 @@ button.p{background:linear-gradient(135deg,#ff4f79,#ff9f1c);color:#fff;border-co
 .chip.on{color:#fff!important}
 h3{margin:16px 0 4px;color:var(--ac);font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .row{background:var(--card);border:1px solid var(--bd);box-shadow:0 2px 6px #ff4f7922;border-radius:12px;padding:8px 10px;margin:4px 0;display:flex;gap:10px;align-items:center}
-.row{padding:5px 8px;gap:6px}.d{flex:none;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}.n small{display:none}.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}.chip{border-width:2px;border-radius:20px;font-weight:600}.row button{padding:2px 7px}
+.row{padding:5px 8px;gap:6px}.d{flex:none;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.n{flex:1 0 auto;white-space:nowrap;font-size:15px;padding-right:8px}#list{overflow-x:auto;padding-bottom:6px}.w{min-width:max-content}.row button{flex:none}.n small{display:none}.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}.chip{border-width:2px;border-radius:20px;font-weight:600}.row button{padding:2px 7px}
 dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--fg);width:min(92vw,380px)}
 label{display:block;margin:8px 0 2px;font-size:13px;color:var(--mut)}
 input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
@@ -44,6 +44,8 @@ input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--
 <script>
 const LABELS=["vetri_family_bday","vetri_friends_bday","vetri_family_wed","raj_family_bday","raj_family_wed"];
 const LC={all:"#ff4f79",vetri_family_bday:"#ff4f79",vetri_friends_bday:"#ff9f1c",vetri_family_wed:"#8f5cff",raj_family_bday:"#00a884",raj_family_wed:"#0984e3"};
+const SH={vetri_family_bday:"v_fam_b",vetri_friends_bday:"v_frn_b",vetri_family_wed:"v_fam_w",raj_family_bday:"r_fam_b",raj_family_wed:"r_fam_w"};
+const sh=l=>SH[l]||l;
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const $=i=>document.getElementById(i);
 let items=[],sha=null,filt="all",editId=null;
@@ -81,18 +83,18 @@ async function save(){
 function render(){
   $("chips").innerHTML=["all",...LABELS].map(l=>{
     const n=l=="all"?items.length:items.filter(i=>i.label==l).length;
-    return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":l} (${n})</button>`}).join("");
+    return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":sh(l)} (${n})</button>`}).join("");
   const v=items.filter(i=>filt=="all"||i.label==filt).sort((a,b)=>(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
   let h="",cm=0;
   for(const i of v){
     if((i.m||99)!=cm){cm=i.m||99;h+=`<h3>${i.m?MON[cm-1]:"No date yet"}</h3>`}
-    h+=`<div class="row" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${i.label||"untagged"}</div>
+    h+=`<div class="row" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||"untagged"}</div>
     <button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
-  $("list").innerHTML=h||"<p style='color:var(--mut)'>No entries.</p>";
+  $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
 }
 
-$("lb").innerHTML=LABELS.map(l=>`<option>${l}</option>`).join("");
+$("lb").innerHTML=LABELS.map(l=>`<option value="${l}">${sh(l)}</option>`).join("");
 function openForm(i){
   editId=i?i.id:null;
   $("nm").value=i?i.name:"";$("ty").value=i?i.type:"bday";
