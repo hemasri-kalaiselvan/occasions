@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Dates</title>
+<style>
+:root{--bg:#faf8f5;--fg:#222;--card:#fff;--mut:#777;--ac:#b4472b;--bd:#e5dfd6}
+@media(prefers-color-scheme:dark){:root{--bg:#1b1a19;--fg:#eee;--card:#262524;--mut:#999;--ac:#e8855f;--bd:#3a3836}}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--fg);padding:12px;max-width:720px;margin:auto}
+h1{font-size:20px;margin:4px 0}header{display:flex;justify-content:space-between;align-items:center}
+button,input,select{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+#chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+h3{margin:16px 0 4px;color:var(--mut);font-size:13px;text-transform:uppercase}
+.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:4px 0;display:flex;gap:10px;align-items:center}
+.d{min-width:64px;font-weight:600}.n{flex:1}.n small{display:block;color:var(--mut)}
+dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--fg);width:min(92vw,380px)}
+label{display:block;margin:8px 0 2px;font-size:13px;color:var(--mut)}
+input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
+.bar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#st{font-size:12px;color:var(--mut);margin:4px 0}
+</style></head><body>
+<header><h1>🎂 Family Dates</h1><span><button id="set">⚙</button> <button class="p" id="add">+ Add</button></span></header>
+<div id="st"></div><div id="chips"></div><div id="list"></div>
+
+<dialog id="f"><form method="dialog" id="ff" onsubmit="return false">
+<label>Name</label><input id="nm" required>
+<label>Type</label><select id="ty"><option value="bday">Birthday</option><option value="wed">Wedding anniversary</option></select>
+<label>Date (optional — leave empty if unknown)</label><input type="date" id="dt">
+<label><input type="checkbox" id="hy"> Include year</label>
+<label>Label</label><select id="lb"></select>
+<div class="bar"><button type="button" id="cx">Cancel</button><button class="p" id="sv">Save</button></div>
+</form></dialog>
+
+<dialog id="g"><form method="dialog" onsubmit="return false">
+<b>GitHub storage</b>
+<label>Private data repo (owner/name)</label><input id="rp" placeholder="you/family-dates-data">
+<label>Fine-grained token (Contents: read &amp; write on that repo only)</label><input id="tk" type="password">
+<label>Data file</label><input id="fl" placeholder="dates.json">
+<p style="font-size:12px;color:var(--mut)">Saved only in this browser. Leave empty to use local-only mode.</p>
+<div class="bar"><button type="button" id="gc">Cancel</button><button class="p" id="gs">Save &amp; load</button></div>
+</form></dialog>
+
+<script>
+const LABELS=["vetri_family_bday","vetri_friends_bday","vetri_family_wed","raj_family_bday","raj_family_wed"];
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const $=i=>document.getElementById(i);
+let items=[],sha=null,filt="all",editId=null;
+let cfg=JSON.parse(localStorage.getItem("cfg")||"{}");
+const remote=()=>cfg.repo&&cfg.token;
+const url=()=>`https://api.github.com/repos/${cfg.repo}/contents/${cfg.file||"dates.json"}`;
+const hdr=()=>({Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json"});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const st=t=>$("st").textContent=t;
+
+async function load(){
+  if(!remote()){items=JSON.parse(localStorage.getItem("items")||"[]");st("Local-only mode (⚙ to connect private repo)");return render();}
+  st("Loading…");
+  try{
+    const r=await fetch(url(),{headers:hdr(),cache:"no-store"});
+    if(r.status==404){items=[];sha=null;st("Data file not found yet — it will be created on first save.");}
+    else if(!r.ok)throw new Error(r.status);
+    else{const j=await r.json();sha=j.sha;items=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));st("Synced with private repo");}
+  }catch(e){st("Load failed ("+e.message+") — check ⚙ settings");}
+  render();
+}
+async function save(){
+  localStorage.setItem("items",JSON.stringify(items));
+  if(!remote())return;
+  st("Saving…");
+  const body={message:"update dates",content:btoa(unescape(encodeURIComponent(JSON.stringify(items,null,1))))};
+  if(sha)body.sha=sha;
+  try{
+    const r=await fetch(url(),{method:"PUT",headers:hdr(),body:JSON.stringify(body)});
+    if(!r.ok)throw new Error(r.status);
+    sha=(await r.json()).content.sha;st("Saved to private repo ✔");
+  }catch(e){st("Save FAILED ("+e.message+") — reload and retry");}
+}
+
+function render(){
+  $("chips").innerHTML=["all",...LABELS].map(l=>{
+    const n=l=="all"?items.length:items.filter(i=>i.label==l).length;
+    return `<button class="chip ${filt==l?"on":""}" data-l="${l}">${l=="all"?"All":l} (${n})</button>`}).join("");
+  const v=items.filter(i=>filt=="all"||i.label==filt).sort((a,b)=>(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
+  let h="",cm=0;
+  for(const i of v){
+    if((i.m||99)!=cm){cm=i.m||99;h+=`<h3>${i.m?MON[cm-1]:"No date yet"}</h3>`}
+    h+=`<div class="row"><div class="d">${i.m?MON[i.m-1]+" "+i.d:"—"}</div><div class="n">${esc(i.name)}<small>${i.type=="wed"?"💍":"🎂"} ${i.label||"untagged"}${i.y?" · "+i.y:""}</small></div>
+    <button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
+  }
+  $("list").innerHTML=h||"<p style='color:var(--mut)'>No entries.</p>";
+}
+
+$("lb").innerHTML=LABELS.map(l=>`<option>${l}</option>`).join("");
+function openForm(i){
+  editId=i?i.id:null;
+  $("nm").value=i?i.name:"";$("ty").value=i?i.type:"bday";
+  $("hy").checked=!!(i&&i.y);
+  $("dt").value=i&&i.m?`${i.y||2000}-${String(i.m).padStart(2,"0")}-${String(i.d).padStart(2,"0")}`:"";
+  $("lb").value=i&&i.label?i.label:(LABELS.includes(filt)?filt:LABELS[0]);
+  $("f").showModal();
+}
+$("add").onclick=()=>openForm();
+$("cx").onclick=()=>$("f").close();
+$("sv").onclick=async()=>{
+  if(!$("nm").value.trim())return $("ff").reportValidity();
+  const [y,m,d]=$("dt").value?$("dt").value.split("-").map(Number):[null,null,null];
+  const o={id:editId||Date.now().toString(36),name:$("nm").value.trim(),type:$("ty").value,m,d,y:$("hy").checked&&m?y:null,label:$("lb").value};
+  items=editId?items.map(i=>i.id==editId?o:i):[...items,o];
+  $("f").close();render();await save();
+};
+document.body.addEventListener("click",async e=>{
+  const t=e.target;
+  if(t.dataset.l){filt=t.dataset.l;render();}
+  if(t.dataset.e)openForm(items.find(i=>i.id==t.dataset.e));
+  if(t.dataset.x&&confirm("Delete this entry?")){items=items.filter(i=>i.id!=t.dataset.x);render();await save();}
+});
+$("set").onclick=()=>{$("rp").value=cfg.repo||"";$("tk").value=cfg.token||"";$("fl").value=cfg.file||"";$("g").showModal();};
+$("gc").onclick=()=>$("g").close();
+$("gs").onclick=()=>{cfg={repo:$("rp").value.trim(),token:$("tk").value.trim(),file:$("fl").value.trim()};
+  localStorage.setItem("cfg",JSON.stringify(cfg));$("g").close();load();};
+load();
+</script></body></html>
