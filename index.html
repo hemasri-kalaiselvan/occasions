@@ -18,10 +18,10 @@ dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);colo
 label{display:block;margin:8px 0 2px;font-size:13px;color:var(--mut)}
 input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
 .bar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-#st{font-size:12px;color:var(--mut);margin:4px 0}
+#tb:not(:empty){background:linear-gradient(135deg,#ffd93d,#ff9f1c);color:#3b2a00;border-radius:14px;padding:10px 12px;margin:8px 0;font-weight:700;box-shadow:0 3px 10px #ff9f1c66}#tb small{display:block;font-weight:500;margin-top:4px}.row.t{background:#fff6c9;box-shadow:0 0 0 2px #ffc400,0 3px 10px #ffc40088}#st{font-size:12px;color:var(--mut);margin:4px 0}
 </style></head><body>
 <header><h1>🎉 Occasions</h1><span><button id="set">⚙</button> <button class="p" id="add">+ Add</button></span></header>
-<div id="st"></div><div id="chips"></div><div id="list"></div>
+<div id="st"></div><div id="tb"></div><div id="chips"></div><div id="list"></div>
 
 <dialog id="f"><form method="dialog" id="ff" onsubmit="return false">
 <label>Name</label><input id="nm" required>
@@ -80,7 +80,18 @@ async function save(){
   }catch(e){st("Save FAILED ("+e.message+") — reload and retry");}
 }
 
+const T=new Date(),t0=new Date(T.getFullYear(),T.getMonth(),T.getDate());
+const dd=i=>{if(!i.m)return 999;let n=new Date(t0.getFullYear(),i.m-1,i.d);if(n<t0)n.setFullYear(n.getFullYear()+1);return Math.round((n-t0)/864e5)};
+const ic=i=>i.type=="wed"?"💍":"🎂";
+function banner(){
+  const td=items.filter(i=>dd(i)==0),up=items.filter(i=>dd(i)>0&&dd(i)<=7).sort((a,b)=>dd(a)-dd(b));
+  let s="";
+  if(td.length)s+="🎉 Today: "+td.map(i=>ic(i)+" "+esc(i.name)+(i.y?" ("+(T.getFullYear()-i.y)+")":"")).join(", ");
+  if(up.length)s+=`<small>Coming up: ${up.map(i=>esc(i.name)+" – "+(dd(i)==1?"tomorrow":"in "+dd(i)+" days")).join(" · ")}</small>`;
+  $("tb").innerHTML=s;
+}
 function render(){
+  banner();
   $("chips").innerHTML=["all",...LABELS].map(l=>{
     const n=l=="all"?items.length:items.filter(i=>i.label==l).length;
     return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":sh(l)} (${n})</button>`}).join("");
@@ -88,7 +99,7 @@ function render(){
   let h="",cm=0;
   for(const i of v){
     if((i.m||99)!=cm){cm=i.m||99;h+=`<h3>${i.m?MON[cm-1]:"No date yet"}</h3>`}
-    h+=`<div class="row" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||"untagged"}</div>
+    h+=`<div class="row${dd(i)==0?" t":""}" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${dd(i)==0?"🎉 ":""}${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||"untagged"}</div>
     <button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
