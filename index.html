@@ -4,40 +4,55 @@
 <title>Occasions</title>
 <style>
 :root{color-scheme:light;--bg:#fff8f0;--fg:#2a2140;--card:#fff;--mut:#7a6f94;--ac:#ff4f79;--bd:#f6d9e4}
-*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:linear-gradient(160deg,#fff1d6,#ffdce9 50%,#dfe8ff) fixed;min-height:100vh;color:var(--fg);padding:12px;max-width:720px;margin:auto}
+*{box-sizing:border-box}
+body{font:16px system-ui,sans-serif;background:linear-gradient(160deg,#fff1d6,#ffdce9 50%,#dfe8ff) fixed;min-height:100vh;color:var(--fg);padding:12px;max-width:720px;margin:auto}
 h1{font-size:24px;margin:4px 0;color:var(--ac)}header{display:flex;justify-content:space-between;align-items:center}
 button,input,select{font:inherit;color:inherit}
 button{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;cursor:pointer}
 button.p{background:linear-gradient(135deg,#ff4f79,#ff9f1c);color:#fff;border-color:transparent;font-weight:700}
-#chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
-.chip.on{color:#fff!important}
+#nav,#chips{display:flex;gap:6px;margin:8px 0}#nav{overflow-x:auto}#chips{flex-wrap:wrap}
+.tab{white-space:nowrap;border-radius:20px;font-weight:700;border:2px solid var(--bd)}
+.tab.on{background:linear-gradient(135deg,#ff4f79,#ff9f1c);color:#fff;border-color:transparent}
+.chip{border-width:2px;border-radius:20px;font-weight:600}.chip.on{color:#fff!important}
 h3{margin:16px 0 4px;color:var(--ac);font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
-.row{background:var(--card);border:1px solid var(--bd);box-shadow:0 2px 6px #ff4f7922;border-radius:12px;padding:8px 10px;margin:4px 0;display:flex;gap:10px;align-items:center}
-.row{padding:5px 8px;gap:6px}.d{flex:none;width:7.4em;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.n{flex:1 0 auto;white-space:nowrap;font-size:15px;padding-right:8px}#list{overflow-x:auto;padding-bottom:6px}.w{min-width:max-content}.row button{flex:none}.n small{display:none}.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}.chip{border-width:2px;border-radius:20px;font-weight:600}.row button{padding:2px 7px}
+.row{background:var(--card);border:1px solid var(--bd);box-shadow:0 2px 6px #ff4f7922;border-radius:12px;margin:4px 0;display:flex;padding:5px 8px;gap:6px;align-items:center}
+.row.t{background:#fff6c9;box-shadow:0 0 0 2px #ffc400,0 3px 10px #ffc40088}
+.d{flex:none;width:7.4em;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.d.m{width:8.4em}
+.n{flex:1 0 auto;white-space:nowrap;font-size:15px;padding-right:8px}
+.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}
+.row button{flex:none;padding:2px 7px}
+#list{overflow-x:auto;padding-bottom:6px}.w{min-width:max-content}
+#tb:not(:empty){background:linear-gradient(135deg,#ffd93d,#ff9f1c);color:#3b2a00;border-radius:14px;padding:10px 12px;margin:8px 0;font-weight:700;box-shadow:0 3px 10px #ff9f1c66}
+#tb small{display:block;font-weight:500;margin-top:4px}
+#st,.hint{font-size:12px;color:var(--mut);margin:4px 0}
 dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--fg);width:min(92vw,380px)}
 label{display:block;margin:8px 0 2px;font-size:13px;color:var(--mut)}
 input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
 .bar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-#tb:not(:empty){background:linear-gradient(135deg,#ffd93d,#ff9f1c);color:#3b2a00;border-radius:14px;padding:10px 12px;margin:8px 0;font-weight:700;box-shadow:0 3px 10px #ff9f1c66}#tb small{display:block;font-weight:500;margin-top:4px}.row.t{background:#fff6c9;box-shadow:0 0 0 2px #ffc400,0 3px 10px #ffc40088}#st{font-size:12px;color:var(--mut);margin:4px 0}
 </style></head><body>
 <header><h1>🎉 Occasions</h1><span><button id="set">⚙</button> <button class="p" id="add">+ Add</button></span></header>
-<div id="st"></div><div id="tb"></div><div id="chips"></div><div id="list"></div>
+<div id="st"></div><div id="tb"></div><div id="nav"></div><div id="chips"></div><div id="tools"></div><div id="list"></div>
 
 <dialog id="f"><form method="dialog" id="ff" onsubmit="return false">
 <label>Name</label><input id="nm" required>
-<label>Type</label><select id="ty"><option value="bday">Birthday</option><option value="wed">Wedding anniversary</option></select>
-<label>Date (optional — leave empty if unknown)</label><input type="date" id="dt">
+<label>Type</label><select id="ty"><option value="bday">Birthday</option><option value="wed">Wedding</option><option value="mem">Memorial (thithi)</option><option value="oth">Other</option></select>
+<label id="dl">Date (optional)</label><input type="date" id="dt">
 <label><input type="checkbox" id="hy"> Include year</label>
+<div id="mx" hidden>
+<button type="button" id="dtc">Detect Tamil thithi from the date above</button>
+<label>Tamil month</label><select id="tm"></select>
+<label>Paksha</label><select id="pk"><option value="s">Sukla (waxing)</option><option value="k">Krishna (waning)</option></select>
+<label>Thithi</label><select id="th"></select></div>
 <label>Label</label><select id="lb"></select>
 <div class="bar"><button type="button" id="cx">Cancel</button><button class="p" id="sv">Save</button></div>
 </form></dialog>
 
 <dialog id="g"><form method="dialog" onsubmit="return false">
 <b>GitHub storage</b>
-<label>Private data repo (owner/name)</label><input id="rp" placeholder="you/family-dates-data">
+<label>Private data repo (owner/name)</label><input id="rp" placeholder="you/occasions-data">
 <label>Fine-grained token (Contents: read &amp; write on that repo only)</label><input id="tk" type="password">
 <label>Data file</label><input id="fl" placeholder="dates.json">
-<p style="font-size:12px;color:var(--mut)">Saved only in this browser. Leave empty to use local-only mode.</p>
+<p class="hint">Saved only in this browser. Leave empty to use local-only mode.</p>
 <div class="bar"><button type="button" id="gc">Cancel</button><button class="p" id="gs">Save &amp; load</button></div>
 </form></dialog>
 
@@ -45,10 +60,14 @@ input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--
 const LABELS=["vetri_family_bday","vetri_friends_bday","vetri_family_wed","raj_family_bday","raj_family_wed"];
 const LC={all:"#ff4f79",vetri_family_bday:"#ff4f79",vetri_friends_bday:"#ff9f1c",vetri_family_wed:"#8f5cff",raj_family_bday:"#00a884",raj_family_wed:"#0984e3"};
 const SH={vetri_family_bday:"v_fam_b",vetri_friends_bday:"v_frn_b",vetri_family_wed:"v_fam_w",raj_family_bday:"r_fam_b",raj_family_wed:"r_fam_w"};
-const sh=l=>SH[l]||l;
+const sh=l=>SH[l]||l||"";
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const TM=["Chithirai","Vaikasi","Aani","Aadi","Aavani","Purattasi","Aippasi","Karthigai","Margazhi","Thai","Maasi","Panguni"];
+const TN=["Prathamai","Dwitiyai","Tritiyai","Chaturthi","Panchami","Sashti","Saptami","Ashtami","Navami","Dasami","Ekadasi","Dwadasi","Thrayodasi","Chaturdasi"];
+const TABS=[["home","Home"],["bday","Birthday"],["wed","Wedding"],["mem","Memorial"],["oth","Other"]];
+const IC={bday:"🎂",wed:"💍",mem:"🕯️",oth:"📌"};
 const $=i=>document.getElementById(i);
-let items=[],sha=null,filt="all",editId=null;
+let items=[],sha=null,filt="all",tab="home",editId=null;
 let cfg=JSON.parse(localStorage.getItem("cfg")||"{}");
 const remote=()=>cfg.repo&&cfg.token;
 const url=()=>`https://api.github.com/repos/${cfg.repo}/contents/${cfg.file||"dates.json"}`;
@@ -56,6 +75,38 @@ const hdr=()=>({Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const st=t=>$("st").textContent=t;
 
+/* ---- Panchangam maths (approximate, India time; tithi at ~2 PM, Tamil month at sunset) ---- */
+const R=Math.PI/180,nm=x=>((x%360)+360)%360,sn=x=>Math.sin(x*R);
+const TT=ms=>(ms/864e5+2440587.5-2451545)/36525;
+const sunL=T=>{const M=357.52911+35999.05029*T;return nm(280.46646+36000.76983*T+(1.914602-.004817*T)*sn(M)+.019993*sn(2*M)+.000289*sn(3*M)-.00569-.00478*sn(125.04-1934.136*T))};
+const moonL=T=>{const L=218.3164477+481267.88123421*T,D=297.8501921+445267.1114034*T,M=357.5291092+35999.0502909*T,P=134.9633964+477198.8675055*T,F=93.272095+483202.0175233*T;
+return nm(L+6.288774*sn(P)+1.274027*sn(2*D-P)+.658314*sn(2*D)+.213618*sn(2*P)-.185116*sn(M)-.114332*sn(2*F)+.058793*sn(2*D-2*P)+.057066*sn(2*D-M-P)+.053322*sn(2*D+P)+.045758*sn(2*D-M)-.040923*sn(M-P)-.03472*sn(D)-.030383*sn(M+P))};
+const thAt=(y,m,d,h)=>{const T=TT(Date.UTC(y,m,d,h,30));return Math.floor(nm(moonL(T)-sunL(T))/12)+1}; /* 8 = 2PM IST, 12 = 6PM IST */
+const tmAt=(y,m,d)=>{const T=TT(Date.UTC(y,m,d,12,30));return Math.floor(nm(sunL(T)-(23.853+1.3972*T))/30)};
+function info(y,m,d){const t=thAt(y,m,d,8);return{tm:tmAt(y,m,d),pk:t>15?"k":"s",th:t>15?t-15:t}}
+function nextOcc(e,from){
+  const g=e.th+(e.pk=="k"?15:0),pv=g==1?30:g-1,nx=g==30?1:g+1;
+  for(let i=0;i<400;i++){
+    const a=new Date(from.getFullYear(),from.getMonth(),from.getDate()+i),y=a.getFullYear(),m=a.getMonth(),d=a.getDate(),t=thAt(y,m,d,8);
+    let c=null,ap=false;
+    if(t==g)c=a;
+    else if(t==pv){const b=new Date(y,m,d+1);if(thAt(b.getFullYear(),b.getMonth(),b.getDate(),8)==nx){ap=true;c=thAt(y,m,d,12)==g?a:b}}
+    if(c&&tmAt(c.getFullYear(),c.getMonth(),c.getDate())==e.tm)return{date:c,approx:ap};
+  }
+  return null;
+}
+const tl=e=>`${TM[e.tm]} · ${e.pk=="s"?"Sukla":"Krishna"} ${e.th==15?(e.pk=="s"?"Pournami":"Amavasai"):TN[e.th-1]}`;
+const T0=new Date(),t0=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate());
+let NC=new Map();
+const nxt=e=>{if(!NC.has(e.id))NC.set(e.id,e.tm==null?null:nextOcc(e,t0));return NC.get(e.id)};
+const dd=i=>{
+  if(i.type=="mem"){const n=nxt(i);return n?Math.round((n.date-t0)/864e5):999}
+  if(!i.m||i.type=="oth")return 999;
+  let n=new Date(t0.getFullYear(),i.m-1,i.d);if(n<t0)n.setFullYear(n.getFullYear()+1);return Math.round((n-t0)/864e5);
+};
+const fd=(d,y)=>MON[d.getMonth()]+" "+d.getDate()+(y?", "+d.getFullYear():"");
+
+/* ---- storage ---- */
 async function load(){
   if(!remote()){items=JSON.parse(localStorage.getItem("items")||"[]");st("Local-only mode (⚙ to connect private repo)");return render();}
   st("Loading…");
@@ -80,54 +131,95 @@ async function save(){
   }catch(e){st("Save FAILED ("+e.message+") — reload and retry");}
 }
 
-const T=new Date(),t0=new Date(T.getFullYear(),T.getMonth(),T.getDate());
-const dd=i=>{if(!i.m)return 999;let n=new Date(t0.getFullYear(),i.m-1,i.d);if(n<t0)n.setFullYear(n.getFullYear()+1);return Math.round((n-t0)/864e5)};
-const ic=i=>i.type=="wed"?"💍":"🎂";
+/* ---- view ---- */
 function banner(){
-  const td=items.filter(i=>dd(i)==0),up=items.filter(i=>dd(i)>0&&dd(i)<=7).sort((a,b)=>dd(a)-dd(b));
+  const A=items.filter(i=>i.type!="oth"),td=A.filter(i=>dd(i)==0),up=A.filter(i=>dd(i)>0&&dd(i)<=7).sort((a,b)=>dd(a)-dd(b));
   let s="";
-  if(td.length)s+="🎉 Today: "+td.map(i=>ic(i)+" "+esc(i.name)+(i.y?" ("+(T.getFullYear()-i.y)+")":"")).join(", ");
-  if(up.length)s+=`<small>Coming up: ${up.map(i=>esc(i.name)+" – "+(dd(i)==1?"tomorrow":"in "+dd(i)+" days")).join(" · ")}</small>`;
+  if(td.length)s+="🎉 Today: "+td.map(i=>IC[i.type]+" "+esc(i.name)+(i.y&&i.type!="mem"?" ("+(T0.getFullYear()-i.y)+")":"")).join(", ");
+  if(up.length)s+=`<small>Coming up: ${up.map(i=>esc(i.name)+" – "+(dd(i)==1?"tomorrow":"in "+dd(i)+" days")+(i.type=="mem"?" ("+fd(nxt(i).date)+")":"")).join(" · ")}</small>`;
   $("tb").innerHTML=s;
 }
 function render(){
-  banner();
-  $("chips").innerHTML=["all",...LABELS].map(l=>{
-    const n=l=="all"?items.length:items.filter(i=>i.label==l).length;
-    return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":sh(l)} (${n})</button>`}).join("");
-  const v=items.filter(i=>filt=="all"||i.label==filt).sort((a,b)=>(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
-  let h="",cm=0;
+  NC=new Map();banner();
+  $("nav").innerHTML=TABS.map(([k,n])=>`<button class="tab ${tab==k?"on":""}" data-t="${k}">${n}</button>`).join("");
+  const scope=items.filter(i=>tab=="home"?i.type=="bday"||i.type=="wed":i.type==tab),lab=["home","bday","wed"].includes(tab);
+  $("chips").innerHTML=lab?["all",...LABELS].map(l=>{
+    const n=l=="all"?scope.length:scope.filter(i=>i.label==l).length;
+    return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":sh(l)} (${n})</button>`}).join(""):"";
+  $("tools").innerHTML=tab=="mem"?'<button id="ics">📅 Export reminders (.ics)</button><div class="hint">Dates follow the Tamil month + thithi (approximate — confirm with your panchangam). ~ means the thithi falls between two days.</div>':"";
+  const v=scope.filter(i=>!lab||filt=="all"||i.label==filt);
+  const K=i=>tab=="mem"?(nxt(i)?nxt(i).date.getFullYear()*12+nxt(i).date.getMonth():9999):(i.m||99);
+  v.sort((a,b)=>tab=="mem"?(nxt(a)?nxt(a).date-(nxt(b)?nxt(b).date:1e15):1)||0:(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
+  let h="",ck=null;
   for(const i of v){
-    if((i.m||99)!=cm){cm=i.m||99;h+=`<h3>${i.m?MON[cm-1]:"No date yet"}</h3>`}
-    h+=`<div class="row${dd(i)==0?" t":""}" style="border-left:6px solid ${LC[i.label]||"#bbb"}"><div class="d">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—"}</div><div class="n">${dd(i)==0?"🎉 ":""}${esc(i.name)}</div><div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||"untagged"}</div>
-    <button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
+    const k=K(i),n=tab=="mem"?nxt(i):null;
+    if(k!=ck){ck=k;h+=`<h3>${tab=="mem"?(n?MON[n.date.getMonth()]+" "+n.date.getFullYear():"Tamil date not set"):(i.m?MON[i.m-1]:"No date yet")}</h3>`}
+    const bc=LC[i.label]||(i.type=="mem"?"#6c5ce7":"#bbb"),t=dd(i)==0;
+    const ds=i.type=="mem"?(n?(n.approx?"~":"")+fd(n.date,1):"—"):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—");
+    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${i.tm==null?"":tl(i)}</div><div class="lb" style="color:var(--mut)">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
+    h+=`<div class="row${t?" t":""}" style="border-left:6px solid ${bc}"><div class="d${i.type=="mem"?" m":""}">${ds}</div><div class="n">${t?"🎉 ":""}${esc(i.name)}</div>${mid}<button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
 }
 
-$("lb").innerHTML=LABELS.map(l=>`<option value="${l}">${sh(l)}</option>`).join("");
+/* ---- form ---- */
+$("lb").innerHTML='<option value="">— none —</option>'+LABELS.map(l=>`<option value="${l}">${sh(l)}</option>`).join("");
+$("tm").innerHTML=TM.map((n,k)=>`<option value="${k}">${n}</option>`).join("");
+function fillTh(){const v=$("th").value;$("th").innerHTML=Array.from({length:15},(_,k)=>`<option value="${k+1}">${k+1} · ${k==14?($("pk").value=="s"?"Pournami":"Amavasai"):TN[k]}</option>`).join("");if(v)$("th").value=v}
+function tg(){const m=$("ty").value=="mem";$("mx").hidden=!m;$("dl").textContent=m?"English date of passing (optional)":"Date (optional — leave empty if unknown)"}
+$("ty").onchange=tg;$("pk").onchange=fillTh;
+$("dtc").onclick=()=>{
+  if(!$("dt").value)return alert("Pick the English date first");
+  const [y,m,d]=$("dt").value.split("-").map(Number),r=info(y,m-1,d);
+  $("tm").value=r.tm;$("pk").value=r.pk;fillTh();$("th").value=r.th;
+};
 function openForm(i){
   editId=i?i.id:null;
-  $("nm").value=i?i.name:"";$("ty").value=i?i.type:"bday";
+  $("nm").value=i?i.name:"";$("ty").value=i?i.type:(IC[tab]&&tab!="home"?tab:"bday");
   $("hy").checked=!!(i&&i.y);
   $("dt").value=i&&i.m?`${i.y||2000}-${String(i.m).padStart(2,"0")}-${String(i.d).padStart(2,"0")}`:"";
-  $("lb").value=i&&i.label?i.label:(LABELS.includes(filt)?filt:LABELS[0]);
-  $("f").showModal();
+  fillTh();$("pk").value=i&&i.pk||"s";fillTh();$("tm").value=i&&i.tm!=null?i.tm:0;$("th").value=i&&i.th||1;
+  const ty=$("ty").value;
+  $("lb").value=i?(i.label||""):(ty=="bday"||ty=="wed"?(LABELS.includes(filt)?filt:LABELS[0]):"");
+  tg();$("f").showModal();
 }
 $("add").onclick=()=>openForm();
 $("cx").onclick=()=>$("f").close();
 $("sv").onclick=async()=>{
   if(!$("nm").value.trim())return $("ff").reportValidity();
-  const [y,m,d]=$("dt").value?$("dt").value.split("-").map(Number):[null,null,null];
-  const o={id:editId||Date.now().toString(36),name:$("nm").value.trim(),type:$("ty").value,m,d,y:$("hy").checked&&m?y:null,label:$("lb").value};
+  const [y,m,d]=$("dt").value?$("dt").value.split("-").map(Number):[null,null,null],ty=$("ty").value;
+  const o={id:editId||Date.now().toString(36),name:$("nm").value.trim(),type:ty,m,d,y:$("hy").checked&&m?y:null,label:$("lb").value};
+  if(ty=="mem"){o.tm=+$("tm").value;o.pk=$("pk").value;o.th=+$("th").value}
   items=editId?items.map(i=>i.id==editId?o:i):[...items,o];
   $("f").close();render();await save();
 };
+
+/* ---- calendar export for memorials ---- */
+function exportIcs(){
+  const p=n=>String(n).padStart(2,"0"),ds=d=>d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());
+  let o="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Occasions//EN\r\n";
+  for(const e of items.filter(i=>i.type=="mem"&&i.tm!=null)){
+    let from=t0;
+    for(let k=0;k<10;k++){
+      const r=nextOcc(e,from);if(!r)break;
+      const a=r.date,b=new Date(a.getFullYear(),a.getMonth(),a.getDate()+1);
+      o+=`BEGIN:VEVENT\r\nUID:mem-${e.id}-${ds(a)}@occasions\r\nDTSTAMP:20260101T000000Z\r\nDTSTART;VALUE=DATE:${ds(a)}\r\nDTEND;VALUE=DATE:${ds(b)}\r\nSUMMARY:🕯️ ${e.name.replace(/[,;]/g," ")}\r\nDESCRIPTION:${tl(e)} (approximate - confirm with panchangam)\r\n`;
+      for(const t of["-PT3H","PT7H"])o+=`BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:${t}\r\nDESCRIPTION:Memorial day\r\nEND:VALARM\r\n`;
+      o+="END:VEVENT\r\n";
+      from=new Date(a.getFullYear(),a.getMonth(),a.getDate()+30);
+    }
+  }
+  o+="END:VCALENDAR\r\n";
+  const l=document.createElement("a");l.href=URL.createObjectURL(new Blob([o],{type:"text/calendar"}));l.download="memorials.ics";l.click();
+}
+
 document.body.addEventListener("click",async e=>{
   const t=e.target;
+  if(t.dataset.t){tab=t.dataset.t;filt="all";render();}
   if(t.dataset.l){filt=t.dataset.l;render();}
   if(t.dataset.e)openForm(items.find(i=>i.id==t.dataset.e));
   if(t.dataset.x&&confirm("Delete this entry?")){items=items.filter(i=>i.id!=t.dataset.x);render();await save();}
+  if(t.id=="ics")exportIcs();
 });
 $("set").onclick=()=>{$("rp").value=cfg.repo||"";$("tk").value=cfg.token||"";$("fl").value=cfg.file||"";$("g").showModal();};
 $("gc").onclick=()=>$("g").close();
