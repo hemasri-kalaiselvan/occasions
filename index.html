@@ -19,7 +19,7 @@ h3{margin:16px 0 4px;color:var(--ac);font-size:14px;font-weight:800;letter-spaci
 .row.t{background:#fff6c9;box-shadow:0 0 0 2px #ffc400,0 3px 10px #ffc40088}
 .d{flex:none;width:7.4em;font-weight:700;color:var(--ac);font-size:13px;white-space:nowrap}.d.m{width:8.4em}
 .n{flex:1 0 auto;white-space:nowrap;font-size:15px;padding-right:8px}
-.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}
+.lb{flex:none;font-size:10px;font-weight:700;white-space:nowrap}.lg{width:6.5em}.c1{width:19em}.c2{width:8em}
 .row button{flex:none;padding:2px 7px}
 #list{overflow-x:auto;padding-bottom:6px}.w{min-width:max-content}
 #tb:not(:empty){background:linear-gradient(135deg,#ffd93d,#ff9f1c);color:#3b2a00;border-radius:14px;padding:10px 12px;margin:8px 0;font-weight:700;box-shadow:0 3px 10px #ff9f1c66}
@@ -146,7 +146,7 @@ function render(){
   $("chips").innerHTML=lab?["all",...LABELS].map(l=>{
     const n=l=="all"?scope.length:scope.filter(i=>i.label==l).length;
     return `<button class="chip ${filt==l?"on":""}" data-l="${l}" style="border-color:${LC[l]};${filt==l?"background:"+LC[l]:"color:"+LC[l]}">${l=="all"?"All":sh(l)} (${n})</button>`}).join(""):"";
-  $("tools").innerHTML=tab=="mem"?'<button id="ics">📅 Export reminders (.ics)</button><div class="hint">Dates follow the Tamil month + thithi (approximate — confirm with your panchangam). ~ means the thithi falls between two days.</div>':"";
+  $("tools").innerHTML=tab=="mem"?'<button id="ics">📅 Export reminders (.ics)</button><div class="hint">Columns: next date · name · Tamil thithi · date you entered. Dates follow the Tamil month + thithi (approximate — confirm with your panchangam). ~ means the thithi falls between two days.</div>':"";
   const v=scope.filter(i=>!lab||filt=="all"||i.label==filt);
   const K=i=>tab=="mem"?(nxt(i)?nxt(i).date.getFullYear()*12+nxt(i).date.getMonth():9999):(i.m||99);
   v.sort((a,b)=>tab=="mem"?(nxt(a)?nxt(a).date-(nxt(b)?nxt(b).date:1e15):1)||0:(a.m||99)-(b.m||99)||(a.d||0)-(b.d||0)||a.name.localeCompare(b.name));
@@ -156,7 +156,7 @@ function render(){
     if(k!=ck){ck=k;h+=`<h3>${tab=="mem"?(n?MON[n.date.getMonth()]+" "+n.date.getFullYear():"Tamil date not set"):(i.m?MON[i.m-1]:"No date yet")}</h3>`}
     const bc=LC[i.label]||(i.type=="mem"?"#6c5ce7":"#bbb"),t=dd(i)==0;
     const ds=i.type=="mem"?(n?(n.approx?"~":"")+fd(n.date,1):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—")):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—");
-    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${tl(i)}</div><div class="lb" style="color:var(--mut)">${n&&i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
+    const mid=i.type=="mem"?`<div class="lb c1" style="color:#6c5ce7">${tl(i)}</div><div class="lb c2" style="color:var(--mut)">${n&&i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb lg" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
     h+=`<div class="row${t?" t":""}" style="border-left:6px solid ${bc}"><div class="d${i.type=="mem"?" m":""}">${ds}</div><div class="n">${t?"🎉 ":""}${esc(i.name)}</div>${mid}<button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
