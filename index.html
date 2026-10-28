@@ -95,10 +95,10 @@ function nextOcc(e,from){
   }
   return null;
 }
-const tl=e=>`${TM[e.tm]} · ${e.pk=="s"?"Sukla":"Krishna"} ${e.th==15?(e.pk=="s"?"Pournami":"Amavasai"):TN[e.th-1]}`;
+const tl=e=>[e.tm!=null?TM[e.tm]:"",e.pk?(e.pk=="s"?"Sukla":"Krishna"):"",e.th?(e.th==15&&e.pk?(e.pk=="s"?"Pournami":"Amavasai"):e.th==15?"15":TN[e.th-1]):""].filter(Boolean).join(" · ");
 const T0=new Date(),t0=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate());
 let NC=new Map();
-const nxt=e=>{if(!NC.has(e.id))NC.set(e.id,e.tm==null?null:nextOcc(e,t0));return NC.get(e.id)};
+const nxt=e=>{if(!NC.has(e.id))NC.set(e.id,e.tm==null||!e.pk||!e.th?null:nextOcc(e,t0));return NC.get(e.id)};
 const dd=i=>{
   if(i.type=="mem"){const n=nxt(i);return n?Math.round((n.date-t0)/864e5):999}
   if(!i.m||i.type=="oth")return 999;
@@ -156,7 +156,7 @@ function render(){
     if(k!=ck){ck=k;h+=`<h3>${tab=="mem"?(n?MON[n.date.getMonth()]+" "+n.date.getFullYear():"Tamil date not set"):(i.m?MON[i.m-1]:"No date yet")}</h3>`}
     const bc=LC[i.label]||(i.type=="mem"?"#6c5ce7":"#bbb"),t=dd(i)==0;
     const ds=i.type=="mem"?(n?(n.approx?"~":"")+fd(n.date,1):"—"):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—");
-    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${i.tm==null?"":tl(i)}</div><div class="lb" style="color:var(--mut)">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
+    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${tl(i)}</div><div class="lb" style="color:var(--mut)">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
     h+=`<div class="row${t?" t":""}" style="border-left:6px solid ${bc}"><div class="d${i.type=="mem"?" m":""}">${ds}</div><div class="n">${t?"🎉 ":""}${esc(i.name)}</div>${mid}<button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
@@ -190,9 +190,9 @@ $("cx").onclick=()=>$("f").close();
 $("sv").onclick=async()=>{
   if(!$("nm").value.trim())return $("ff").reportValidity();
   const [y,m,d]=$("dt").value?$("dt").value.split("-").map(Number):[null,null,null],ty=$("ty").value;
-  if(ty=="mem"&&(!$("tm").value||!$("pk").value||!$("th").value))return alert("Please choose Tamil month, paksha and thithi (or pick the English date and tap Detect).");
+  const mv=[$("tm").value,$("pk").value,$("th").value];
   const o={id:editId||Date.now().toString(36),name:$("nm").value.trim(),type:ty,m,d,y:$("hy").checked&&m?y:null,label:$("lb").value};
-  if(ty=="mem"){o.tm=+$("tm").value;o.pk=$("pk").value;o.th=+$("th").value}
+  if(ty=="mem"){o.tm=mv[0]!==""?+mv[0]:null;o.pk=mv[1]||null;o.th=mv[2]!==""?+mv[2]:null}
   items=editId?items.map(i=>i.id==editId?o:i):[...items,o];
   $("f").close();render();await save();
 };
@@ -201,7 +201,7 @@ $("sv").onclick=async()=>{
 function exportIcs(){
   const p=n=>String(n).padStart(2,"0"),ds=d=>d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());
   let o="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Occasions//EN\r\n";
-  for(const e of items.filter(i=>i.type=="mem"&&i.tm!=null)){
+  for(const e of items.filter(i=>i.type=="mem"&&i.tm!=null&&i.pk&&i.th)){
     let from=t0;
     for(let k=0;k<10;k++){
       const r=nextOcc(e,from);if(!r)break;
