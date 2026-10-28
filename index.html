@@ -36,7 +36,7 @@ input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--
 <dialog id="f"><form method="dialog" id="ff" onsubmit="return false">
 <label>Name</label><input id="nm" required>
 <label>Type</label><select id="ty"><option value="bday">Birthday</option><option value="wed">Wedding</option><option value="mem">Memorial (thithi)</option><option value="oth">Other</option></select>
-<label id="dl">Date (optional)</label><input type="date" id="dt">
+<label id="dl">Date (optional)</label><input type="date" id="dt"><button type="button" id="dc" style="margin-top:4px">✕ Clear date</button>
 <label><input type="checkbox" id="hy"> Include year</label>
 <div id="mx" hidden>
 <button type="button" id="dtc">Detect Tamil thithi from the date above</button>
@@ -155,8 +155,8 @@ function render(){
     const k=K(i),n=tab=="mem"?nxt(i):null;
     if(k!=ck){ck=k;h+=`<h3>${tab=="mem"?(n?MON[n.date.getMonth()]+" "+n.date.getFullYear():"Tamil date not set"):(i.m?MON[i.m-1]:"No date yet")}</h3>`}
     const bc=LC[i.label]||(i.type=="mem"?"#6c5ce7":"#bbb"),t=dd(i)==0;
-    const ds=i.type=="mem"?(n?(n.approx?"~":"")+fd(n.date,1):"—"):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—");
-    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${tl(i)}</div><div class="lb" style="color:var(--mut)">${i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
+    const ds=i.type=="mem"?(n?(n.approx?"~":"")+fd(n.date,1):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—")):(i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):"—");
+    const mid=i.type=="mem"?`<div class="lb" style="color:#6c5ce7">${tl(i)}</div><div class="lb" style="color:var(--mut)">${n&&i.m?MON[i.m-1]+" "+i.d+(i.y?", "+i.y:""):""}</div>`:`<div class="lb" style="color:${LC[i.label]||"#999"}">${sh(i.label)||(i.type=="oth"?"":"untagged")}</div>`;
     h+=`<div class="row${t?" t":""}" style="border-left:6px solid ${bc}"><div class="d${i.type=="mem"?" m":""}">${ds}</div><div class="n">${t?"🎉 ":""}${esc(i.name)}</div>${mid}<button data-e="${i.id}">✎</button><button data-x="${i.id}">🗑</button></div>`;
   }
   $("list").innerHTML=h?`<div class="w">${h}</div>`:"<p style='color:var(--mut)'>No entries.</p>";
@@ -168,6 +168,7 @@ $("tm").innerHTML='<option value="">— select —</option>'+TM.map((n,k)=>`<opt
 function fillTh(){const v=$("th").value;$("th").innerHTML='<option value="">— select —</option>'+Array.from({length:15},(_,k)=>`<option value="${k+1}">${k+1} · ${k==14?($("pk").value=="s"?"Pournami":"Amavasai"):TN[k]}</option>`).join("");if(v)$("th").value=v}
 function tg(){const m=$("ty").value=="mem";$("mx").hidden=!m;$("dl").textContent=m?"English date of passing (optional)":"Date (optional — leave empty if unknown)"}
 $("ty").onchange=tg;$("pk").onchange=fillTh;
+$("dc").onclick=()=>{$("dt").value="";$("hy").checked=false};
 $("dtc").onclick=()=>{
   if(!$("dt").value)return alert("Pick the English date first");
   const [y,m,d]=$("dt").value.split("-").map(Number);
