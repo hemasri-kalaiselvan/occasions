@@ -41,7 +41,7 @@ input:not([type=checkbox]),select{width:100%;padding:8px;border:1px solid var(--
 <div id="mx" hidden>
 <button type="button" id="dtc">Detect Tamil thithi from the date above</button>
 <label>Tamil month</label><select id="tm"></select>
-<label>Paksha</label><select id="pk"><option value="s">Sukla (waxing)</option><option value="k">Krishna (waning)</option></select>
+<label>Paksha</label><select id="pk"><option value="">— select —</option><option value="s">Sukla (waxing)</option><option value="k">Krishna (waning)</option></select>
 <label>Thithi</label><select id="th"></select></div>
 <label>Label</label><select id="lb"></select>
 <div class="bar"><button type="button" id="cx">Cancel</button><button class="p" id="sv">Save</button></div>
@@ -164,13 +164,15 @@ function render(){
 
 /* ---- form ---- */
 $("lb").innerHTML='<option value="">— none —</option>'+LABELS.map(l=>`<option value="${l}">${sh(l)}</option>`).join("");
-$("tm").innerHTML=TM.map((n,k)=>`<option value="${k}">${n}</option>`).join("");
-function fillTh(){const v=$("th").value;$("th").innerHTML=Array.from({length:15},(_,k)=>`<option value="${k+1}">${k+1} · ${k==14?($("pk").value=="s"?"Pournami":"Amavasai"):TN[k]}</option>`).join("");if(v)$("th").value=v}
+$("tm").innerHTML='<option value="">— select —</option>'+TM.map((n,k)=>`<option value="${k}">${n}</option>`).join("");
+function fillTh(){const v=$("th").value;$("th").innerHTML='<option value="">— select —</option>'+Array.from({length:15},(_,k)=>`<option value="${k+1}">${k+1} · ${k==14?($("pk").value=="s"?"Pournami":"Amavasai"):TN[k]}</option>`).join("");if(v)$("th").value=v}
 function tg(){const m=$("ty").value=="mem";$("mx").hidden=!m;$("dl").textContent=m?"English date of passing (optional)":"Date (optional — leave empty if unknown)"}
 $("ty").onchange=tg;$("pk").onchange=fillTh;
 $("dtc").onclick=()=>{
   if(!$("dt").value)return alert("Pick the English date first");
-  const [y,m,d]=$("dt").value.split("-").map(Number),r=info(y,m-1,d);
+  const [y,m,d]=$("dt").value.split("-").map(Number);
+  if(y==T0.getFullYear()&&m==T0.getMonth()+1&&d==T0.getDate()&&!confirm("That is today's date. Use it as the date of passing?"))return;
+  const r=info(y,m-1,d);
   $("tm").value=r.tm;$("pk").value=r.pk;fillTh();$("th").value=r.th;
 };
 function openForm(i){
@@ -178,7 +180,7 @@ function openForm(i){
   $("nm").value=i?i.name:"";$("ty").value=i?i.type:(IC[tab]&&tab!="home"?tab:"bday");
   $("hy").checked=!!(i&&i.y);
   $("dt").value=i&&i.m?`${i.y||2000}-${String(i.m).padStart(2,"0")}-${String(i.d).padStart(2,"0")}`:"";
-  fillTh();$("pk").value=i&&i.pk||"s";fillTh();$("tm").value=i&&i.tm!=null?i.tm:0;$("th").value=i&&i.th||1;
+  fillTh();$("pk").value=i&&i.pk||"";fillTh();$("tm").value=i&&i.tm!=null?i.tm:"";$("th").value=i&&i.th||"";
   const ty=$("ty").value;
   $("lb").value=i?(i.label||""):(ty=="bday"||ty=="wed"?(LABELS.includes(filt)?filt:LABELS[0]):"");
   tg();$("f").showModal();
@@ -188,6 +190,7 @@ $("cx").onclick=()=>$("f").close();
 $("sv").onclick=async()=>{
   if(!$("nm").value.trim())return $("ff").reportValidity();
   const [y,m,d]=$("dt").value?$("dt").value.split("-").map(Number):[null,null,null],ty=$("ty").value;
+  if(ty=="mem"&&(!$("tm").value||!$("pk").value||!$("th").value))return alert("Please choose Tamil month, paksha and thithi (or pick the English date and tap Detect).");
   const o={id:editId||Date.now().toString(36),name:$("nm").value.trim(),type:ty,m,d,y:$("hy").checked&&m?y:null,label:$("lb").value};
   if(ty=="mem"){o.tm=+$("tm").value;o.pk=$("pk").value;o.th=+$("th").value}
   items=editId?items.map(i=>i.id==editId?o:i):[...items,o];
